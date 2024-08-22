@@ -1,5 +1,3 @@
-const fs = require("fs").promises;
-const path = require("path");
 const https = require("https");
 const { DirectSecp256k1HdWallet } = require("@cosmjs/proto-signing");
 const {
@@ -8,9 +6,7 @@ const {
 } = require("@akashnetwork/akash-api/akash/provider/v1beta3");
 const { getRpc } = require("@akashnetwork/akashjs/build/rpc");
 const { SDL } = require("@akashnetwork/akashjs/build/sdl");
-const {
-  certificateManager,
-} = require("@akashnetwork/akashjs/build/certificates/certificate-manager");
+const { loadOrCreateCertificate } = require("./certificateService"); // Import your certificate service
 const { generateSDL } = require("../utils/sdlGenerator");
 
 const rpcEndpoint = "https://rpc.sandbox-01.aksh.pw:443";
@@ -39,7 +35,9 @@ async function sendManifest(dseq, provider, dockerImage, cpu, memory, storage) {
     }
 
     const providerInfo = providerResponse.provider;
-    const certificate = await getOrCreateCertificate(account.address);
+
+    // Use the certificate service to load or create the certificate
+    const certificate = await loadOrCreateCertificate(mnemonic);
 
     const sdl = generateSDL(dockerImage, cpu, memory, storage);
     const manifest = SDL.fromString(sdl, "beta3").manifestSortedJSON();
@@ -62,7 +60,7 @@ async function sendManifest(dseq, provider, dockerImage, cpu, memory, storage) {
             "Content-Length": Buffer.byteLength(manifest),
           },
           cert: certificate.cert,
-          key: certificate.key,
+          key: certificate.privateKey,
           rejectUnauthorized: false, // Disable SSL verification
         },
         (res) => {
@@ -94,29 +92,6 @@ async function sendManifest(dseq, provider, dockerImage, cpu, memory, storage) {
     });
   } catch (error) {
     console.error("Error in sendManifest:", error);
-    throw error;
-  }
-}
-
-async function getOrCreateCertificate(address) {
-  const certDir = path.join(__dirname, "../certs");
-  const certPath = path.join(certDir, `${address}.cert.json`);
-
-  try {
-    await fs.mkdir(certDir, { recursive: true });
-    const certData = await fs.readFile(certPath, "utf8");
-    return JSON.parse(certData);
-  } catch (error) {
-    if (error.code === "ENOENT") {
-      console.log("Certificate not found, creating new one...");
-      const cert = certificateManager.generatePEM(address);
-      const certJson = JSON.stringify({
-        cert: cert.certificate,
-        key: cert.privateKey,
-      });
-      await fs.writeFile(certPath, certJson, "utf8");
-      return JSON.parse(certJson);
-    }
     throw error;
   }
 }
