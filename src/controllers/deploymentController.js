@@ -6,6 +6,7 @@ const { sendManifest } = require("../services/manifestService");
 const { listAllProviders } = require("../services/listAllProvidersService");
 const { closeDeployment } = require("../services/closeDeploymentService");
 const { listDeployments } = require("../services/listDeploymentsService");
+const { getSingleProviderInfo } = require("../services/singleProviderService");
 
 exports.listDeployments = async (req, res) => {
   try {
@@ -100,6 +101,17 @@ exports.listAllProviders = async (req, res) => {
     res.status(200).json(providers);
   } catch (error) {
     console.error("Error in listAllProviders controller:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getSingleProvider = async (req, res) => {
+  try {
+    const { address } = req.params;
+    const providerInfo = await getSingleProviderInfo(address);
+    res.status(200).json(providerInfo);
+  } catch (error) {
+    console.error("Error in getSingleProvider controller:", error);
     res.status(500).json({ error: error.message });
   }
 };
