@@ -7,6 +7,7 @@ const { listAllProviders } = require("../services/listAllProvidersService");
 const { closeDeployment } = require("../services/closeDeploymentService");
 const { listDeployments } = require("../services/listDeploymentsService");
 const { getSingleProviderInfo } = require("../services/singleProviderService");
+const { fetchLogs } = require("../services/fetchLogsService");
 
 exports.listDeployments = async (req, res) => {
   try {
@@ -76,6 +77,18 @@ exports.checkLeaseStatus = async (req, res) => {
   }
 };
 
+exports.getLogs = async (req, res) => {
+  const { dseq } = req.params;
+  const { gseq, oseq, provider } = req.query;
+
+  try {
+    const logs = await fetchLogs(dseq, gseq, oseq, provider);
+    res.json(logs);
+  } catch (error) {
+    console.error("Error in getLogs controller:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
 exports.sendManifest = async (req, res) => {
   try {
     const { dseq } = req.params;

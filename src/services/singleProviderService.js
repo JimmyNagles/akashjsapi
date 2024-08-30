@@ -12,6 +12,8 @@ async function getSingleProviderInfo(providerAddress) {
       owner: providerAddress,
     };
     const providerResponse = await client.Provider(getProviderInfoRequest);
+
+    console.log(providerResponse);
     return providerResponse;
   } catch (error) {
     console.error("Error in getSingleProviderInfo:", error);

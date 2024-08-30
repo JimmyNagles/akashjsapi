@@ -17,16 +17,9 @@ const rpcEndpoint =
 const certificatePath = path.resolve(__dirname, "../certs/cert.json");
 
 async function loadOrCreateCertificate(mnemonic) {
-  console.log("Entering loadOrCreateCertificate");
-
-  // Step 1: Create the wallet using the provided mnemonic
-  console.log("Creating wallet with mnemonic:", mnemonic);
-
   const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
     prefix: "akash",
   });
-
-  console.log("Wallet created");
 
   // Step 2: Set up the Stargate client
   const registry = getAkashTypeRegistry();
@@ -35,8 +28,6 @@ async function loadOrCreateCertificate(mnemonic) {
     wallet,
     { registry: new Registry(registry) }
   );
-
-  console.log("Stargate client set up");
 
   // Step 3: Check if the certificate exists or create a new one
   if (fs.existsSync(certificatePath)) {
@@ -56,7 +47,7 @@ function loadCertificate() {
 
   try {
     const certificate = JSON.parse(json);
-    console.log("Certificate loaded:", certificate);
+
     return certificate;
   } catch (e) {
     throw new Error(`Could not parse certificate: ${e}`);
