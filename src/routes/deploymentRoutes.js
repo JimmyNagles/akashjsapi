@@ -9,7 +9,7 @@ router.post("/:dseq/lease", deploymentController.createLease);
 router.post("/lease-status", deploymentController.checkLeaseStatus);
 
 router.post("/:dseq/manifest", deploymentController.sendManifest);
-
+router.get("/:dseq/logs", deploymentController.getLogs);
 router.post("/close", deploymentController.closeDeployment);
 
 router.post("/list-deployments", deploymentController.listDeployments);
